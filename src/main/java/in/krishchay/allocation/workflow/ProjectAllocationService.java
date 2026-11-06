@@ -154,13 +154,20 @@ public class ProjectAllocationService {
         Long studentId = studentId(authorization);
         return jdbc.queryForList("""
                 SELECT p.id AS "projectId", p.title, p.description,
-                       u.full_name AS "facultyName", a.allocated_at AS "allocatedAt"
+                       u.full_name AS "facultyName", a.allocated_at AS "allocatedAt",
+                       team_user.full_name AS "memberName",
+                       team_student.roll_number AS "memberRollNumber",
+                       (team_student.id = ?) AS "isCurrentStudent"
                 FROM project_allocations a
                 JOIN projects p ON p.id = a.project_id
                 JOIN faculty f ON f.id = p.faculty_id
                 JOIN app_users u ON u.id = f.user_id
+                JOIN project_allocations team_allocation ON team_allocation.project_id = p.id
+                JOIN students team_student ON team_student.id = team_allocation.student_id
+                JOIN app_users team_user ON team_user.id = team_student.user_id
                 WHERE a.student_id = ?
-                """, studentId);
+                ORDER BY team_student.roll_number
+                """, studentId, studentId);
     }
 
     public List<Map<String, Object>> listAllocations(String authorization) {
