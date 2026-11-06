@@ -40,11 +40,13 @@ export DB_URL=jdbc:postgresql://localhost:5432/project_allocation
 export DB_USERNAME=allocation
 export DB_PASSWORD=allocation_dev
 mvn spring-boot:run
-
-If port 8080 is already occupied, run `SERVER_PORT=8081 mvn spring-boot:run` and open http://localhost:8081/.
 ```
 
-The API starts at http://localhost:8080.
+The API starts at http://localhost:8080. If port 8080 is already occupied, run this instead and open http://localhost:8081/:
+
+```bash
+SERVER_PORT=8081 mvn spring-boot:run
+```
 
 ### Verify the API
 - GET /api/health — application status
@@ -219,7 +221,9 @@ The array order represents preference rank: project 2 is first choice, project 1
 ### Allocation rule and limitations
 This is a deliberately simple, deterministic demo algorithm—not a globally optimal matching algorithm. It processes students by database ID and tries each student's choices in rank order until it finds a project with a free seat. If every selected project is full, that student remains unallocated. Rerunning allocation replaces the previous results.
 
-### Phase 3 manual acceptance checklist
+### Phase 3 verification and manual acceptance checklist
+
+- [x] GitHub Actions Java 21 build and automated tests passed (run 29).
 - [ ] Faculty can add a project and it appears in the catalogue.
 - [ ] A student can save ranked preferences and reload them.
 - [ ] Admin can run allocation and see the result counts.
