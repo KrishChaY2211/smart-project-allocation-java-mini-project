@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Project Allocation</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#182033;min-height:100vh;display:grid;place-items:center;padding:24px}
+    main{width:min(920px,100%);display:grid;grid-template-columns:1fr 1fr;background:white;border-radius:18px;overflow:hidden;box-shadow:0 14px 45px #18203318}
+    aside{background:#182b49;color:white;padding:42px 34px}aside h1{font-size:30px;line-height:1.15}aside p{color:#d4deed;line-height:1.6}
+    section{padding:36px}h2{margin-top:0}.tabs{display:flex;gap:8px;margin:20px 0}.tabs button,button{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:600}.tabs button{background:#eef1f6}.tabs button.active,button.primary{background:#2459a6;color:white}
+    label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}input{width:100%;padding:11px;border:1px solid #d5dbe5;border-radius:8px;font:inherit}form button{width:100%;margin-top:18px}
+    .hidden{display:none!important}.message{min-height:22px;color:#b42318;font-size:14px}.hint{font-size:13px;color:#657086;line-height:1.5}.dashboard{background:#f6f8fb;border-radius:12px;padding:18px;margin-top:18px}
+    @media(max-width:680px){main{grid-template-columns:1fr}aside{padding:28px}section{padding:26px}}
+  </style>
+</head>
+<body>
+<main>
+  <aside>
+    <h1>Smart Project Allocation</h1>
+    <p>A simple place for students and faculty to take part in the college project allocation process.</p>
+    <p>Sign in to continue, or create a student account to get started.</p>
+  </aside>
+  <section>
+    <div id="authPanel">
+      <h2>Welcome</h2>
+      <div class="tabs">
+        <button id="loginTab" class="active" type="button">Sign in</button>
+        <button id="registerTab" type="button">Student registration</button>
+      </div>
+      <form id="loginForm">
+        <label>Email</label><input name="email" type="email" required>
+        <label>Password</label><input name="password" type="password" required>
+        <button class="primary" type="submit">Sign in</button>
+      </form>
+      <form id="registerForm" class="hidden">
+        <label>Full name</label><input name="fullName" required maxlength="120">
+        <label>Email</label><input name="email" type="email" required>
+        <label>Password (minimum 8 characters)</label><input name="password" type="password" minlength="8" maxlength="72" required>
+        <label>Roll number</label><input name="rollNumber" required>
+        <label>Department</label><input name="department" value="CSE" required>
+        <label>Skills (optional)</label><input name="skills" placeholder="Java, Python">
+        <button class="primary" type="submit">Create student account</button>
+      </form>
+      <p id="message" class="message" role="status"></p>
+      <p class="hint">Demo accounts are listed in the README. Public registration creates student accounts only.</p>
+    </div>
+    <div id="dashboard" class="hidden">
+      <h2>You're signed in</h2>
+      <div class="dashboard">
+        <p id="welcome"></p><p id="role"></p>
+        <p id="roleInfo" class="hint"></p>
+      </div>
+      <button id="logoutButton" class="primary" type="button">Log out</button>
+    </div>
+  </section>
+</main>
+<script>
+const API='/api/auth';let token=null;
+const $=id=>document.getElementById(id);
+function showMessage(text,isError=true){$('message').textContent=text;$('message').style.color=isError?'#b42318':'#18794e'}
+function showTab(register){$('loginForm').classList.toggle('hidden',register);$('registerForm').classList.toggle('hidden',!register);$('loginTab').classList.toggle('active',!register);$('registerTab').classList.toggle('active',register);showMessage('')}
+async function send(path,data,auth=false){const response=await fetch(API+path,{method:data?'POST':'GET',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+token}:{})},...(data?{body:JSON.stringify(data)}:{})});if(response.status===204)return null;const result=await response.json().catch(()=>({message:'Unexpected server response'}));if(!response.ok)throw new Error(result.message||'Request failed');return result}
+function openDashboard(user){$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('welcome').textContent='Welcome, '+user.fullName;$('role').textContent='Account type: '+user.role;$('roleInfo').textContent=user.role==='STUDENT'?'You can submit project preferences when the allocation module is available.':user.role==='FACULTY'?'Faculty account: project management will be available in the next module.':'Administrator account: allocation controls will be available in the next module.'}
+$('loginTab').onclick=()=>showTab(false);$('registerTab').onclick=()=>showTab(true);
+$('loginForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{const result=await send('/login',data);token=result.token;openDashboard(result.user)}catch(err){showMessage(err.message)}};
+$('registerForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{await send('/register',data);showTab(false);$('loginForm').elements.email.value=data.email;showMessage('Account created. Please sign in.',false)}catch(err){showMessage(err.message)}};
+$('logoutButton').onclick=async()=>{try{await send('/logout',null,true)}catch(err){}token=null;$('dashboard').classList.add('hidden');$('authPanel').classList.remove('hidden');showMessage('You have been logged out.',false)};
+</script>
+</body>
+</html>
