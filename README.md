@@ -90,3 +90,47 @@ Phase 1 is infrastructure only. Authentication, dashboards, project CRUD, prefer
 5. Team formation
 6. Collaboration, chat and notifications
 7. Reports, testing and final documentation
+
+
+## Phase 2: Basic student accounts (in progress)
+
+The first user-management slice is implemented:
+- Student registration creates both an app user and student profile.
+- Passwords are hashed with BCrypt; plain-text passwords are never stored.
+- Login creates a 12-hour bearer session. Only a SHA-256 hash of the session token is stored in PostgreSQL.
+- The current-user endpoint validates the bearer session.
+- Logout deletes the session.
+- Public registration always creates the STUDENT role. It does not accept a role from the client.
+
+### Authentication API
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/auth/register` | Register a student |
+| POST | `/api/auth/login` | Log in and receive a bearer token |
+| GET | `/api/auth/me` | Get the current account (send `Authorization: Bearer <token>`) |
+| POST | `/api/auth/logout` | End the current session |
+
+Registration JSON example:
+
+```json
+{
+  "fullName": "Asha Rao",
+  "email": "asha@example.com",
+  "password": "a-strong-password",
+  "rollNumber": "CSE001",
+  "department": "CSE",
+  "skills": "Java, Python"
+}
+```
+
+Login JSON example:
+
+```json
+{
+  "email": "asha@example.com",
+  "password": "a-strong-password"
+}
+```
+
+The login response includes a bearer token. Send it in the Authorization header for the `/me` and `/logout` endpoints. Faculty and admin account creation will be added through a controlled admin workflow, not public registration.
