@@ -48,4 +48,13 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.database").value("PostgreSQL"))
                 .andExpect(jsonPath("$.publicTableCount").value(5));
     }
+
+    @Test
+    void databaseHealthReturnsServiceUnavailableWhenDatabaseCheckFails() throws Exception {
+        when(jdbcTemplate.queryForObject(eq("SELECT CURRENT_TIMESTAMP"), any(org.springframework.jdbc.core.RowMapper.class)))
+                .thenThrow(new IllegalStateException("database unavailable"));
+
+        mockMvc.perform(get("/api/health/database"))
+                .andExpect(status().isServiceUnavailable());
+    }
 }
