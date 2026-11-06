@@ -1,7 +1,7 @@
 # Phase 1 — Foundation
 
 ## Goal
-Create a reproducible backend foundation that can be extended into the Smart Project Allocation and Team Collaboration Platform.
+Get a small Spring Boot and PostgreSQL application running as the base for the college project demo.
 
 ## Architecture
 
@@ -47,8 +47,14 @@ The GitHub Actions workflow Build and test runs Maven verify using Java 21 and a
 
 ## Deliberate limitations
 
-- No login, registration or authorisation yet.
-- No project CRUD or student preference API yet.
-- No allocation algorithm or team assignment yet.
-- The SQL schema is initialised on application startup; versioned migrations are a later improvement.
-- The database password in Docker Compose is a local-development default, not a production credential.
+This is a college working model, not a production system. Keep the implementation small and easy to demonstrate.
+
+- Basic student registration and login APIs have since been added under `/api/auth`; see the README for their current contract.
+- Project CRUD, preference submission and allocation are still future implementation work.
+- No cloud deployment, microservices, advanced optimisation, or production security infrastructure is planned.
+- The SQL schema is initialised on application startup.
+- The database password in Docker Compose is a local-development default.
+
+## College demo acceptance
+
+The project is useful when a student can register, submit ranked project choices, and later view an allocation made using project seat limits. A faculty/admin demo account should be able to add projects. Team display and a basic discussion feature are optional only after this main workflow works reliably.
