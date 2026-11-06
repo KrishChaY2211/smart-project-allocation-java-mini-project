@@ -121,7 +121,9 @@ public class ProjectAllocationService {
         Map<Long, Integer> remainingSeats = new HashMap<>();
         jdbc.query("""
                 SELECT id, max_members FROM projects WHERE active = TRUE ORDER BY id
-                """, rs -> remainingSeats.put(rs.getLong("id"), rs.getInt("max_members")));
+                """, (org.springframework.jdbc.core.RowCallbackHandler) rs -> {
+            remainingSeats.put(rs.getLong("id"), rs.getInt("max_members"));
+        });
 
         List<Map<String, Object>> choices = jdbc.queryForList("""
                 SELECT pp.student_id, pp.project_id
