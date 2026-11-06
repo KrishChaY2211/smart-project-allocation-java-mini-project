@@ -144,3 +144,35 @@ Login JSON example:
 ```
 
 The login response includes a bearer token. Send it in the Authorization header for the `/me` and `/logout` endpoints. Faculty and admin account creation will be added through a controlled admin workflow, not public registration.
+
+
+## Phase 2: Basic accounts and sign-in page
+
+Phase 2 adds a small browser-based entry point and demo accounts for the college presentation.
+
+### Open the application
+
+Start PostgreSQL and the backend using the Phase 1 instructions, then open:
+
+`http://localhost:8080/`
+
+Students can register from the page and then sign in. Faculty and admin use the demo accounts below. The dashboard displays the signed-in user's role.
+
+### Demo accounts
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@college.local` | `Admin@12345` |
+| Faculty | `faculty@college.local` | `Faculty@12345` |
+
+These are local classroom-demo credentials only. Change them through the `DEMO_ADMIN_*` and `DEMO_FACULTY_*` environment variables before using the app anywhere beyond a local demo. The accounts are created on startup if their email addresses do not already exist. Public student registration cannot create privileged roles.
+
+### Phase 2 acceptance checklist
+
+- [x] Student registration API and browser form.
+- [x] Student login and logout.
+- [x] Faculty and admin demo accounts seeded from configuration.
+- [x] BCrypt password hashes and hashed session-token storage.
+- [x] Role is shown on the signed-in dashboard.
+- [ ] Automated CI verification of the complete Phase 2 changes.
+- [ ] Manual browser verification against a running local PostgreSQL instance.
