@@ -26,9 +26,16 @@ From the repository root:
 ```bash
 docker compose up -d db
 docker compose ps
-
-For Fedora with Podman, use `podman-compose up -d db` instead. The image is pinned to Docker Hub explicitly so Podman does not try Fedora's registry.
 ```
+
+For Fedora with Podman, use:
+
+```bash
+podman-compose up -d db
+podman ps
+```
+
+The image is pinned to Docker Hub explicitly so Podman does not try Fedora's registry.
 
 Wait until the database container reports healthy.
 
