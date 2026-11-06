@@ -5,22 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Project Allocation</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#182033;min-height:100vh;display:grid;place-items:center;padding:24px}
-    main{width:min(920px,100%);display:grid;grid-template-columns:1fr 1fr;background:white;border-radius:18px;overflow:hidden;box-shadow:0 14px 45px #18203318}
-    aside{background:#182b49;color:white;padding:42px 34px}aside h1{font-size:30px;line-height:1.15}aside p{color:#d4deed;line-height:1.6}
-    section{padding:36px}h2{margin-top:0}.tabs{display:flex;gap:8px;margin:20px 0}.tabs button,button{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:600}.tabs button{background:#eef1f6}.tabs button.active,button.primary{background:#2459a6;color:white}
-    label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}input{width:100%;padding:11px;border:1px solid #d5dbe5;border-radius:8px;font:inherit}form button{width:100%;margin-top:18px}
-    .hidden{display:none!important}.message{min-height:22px;color:#b42318;font-size:14px}.hint{font-size:13px;color:#657086;line-height:1.5}.dashboard{background:#f6f8fb;border-radius:12px;padding:18px;margin-top:18px}
-    @media(max-width:680px){main{grid-template-columns:1fr}aside{padding:28px}section{padding:26px}}
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#182033;min-height:100vh;padding:24px}
+    main{width:min(1050px,100%);margin:30px auto;background:white;border-radius:18px;overflow:hidden;box-shadow:0 14px 45px #18203318}
+    header{background:#182b49;color:white;padding:28px 34px}header h1{margin:0 0 8px}header p{margin:0;color:#d4deed}
+    section{padding:30px 34px}.hidden{display:none!important}.tabs{display:flex;gap:8px;margin:18px 0}.tabs button,button{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:600}.tabs button{background:#eef1f6}.tabs button.active,button.primary{background:#2459a6;color:white}
+    label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}input,textarea{width:100%;padding:11px;border:1px solid #d5dbe5;border-radius:8px;font:inherit}textarea{min-height:85px;resize:vertical}form button{margin-top:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:#f6f8fb;border:1px solid #e5e9f0;border-radius:12px;padding:18px;margin:16px 0}.project{display:grid;grid-template-columns:1fr 90px;gap:12px;align-items:center;border-bottom:1px solid #e5e9f0;padding:14px 0}.project:last-child{border-bottom:0}.project h3{margin:0 0 5px;font-size:16px}.muted,.hint{color:#657086;font-size:13px;line-height:1.5}.message{min-height:22px;color:#b42318;font-size:14px}.success{color:#18794e}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:10px;border-bottom:1px solid #e5e9f0}th{color:#526078}.badge{display:inline-block;background:#e8effb;color:#2459a6;padding:4px 8px;border-radius:20px;font-size:12px}
+    @media(max-width:700px){body{padding:10px}main{margin:8px auto}header,section{padding:22px}.grid{grid-template-columns:1fr}.project{grid-template-columns:1fr 75px}}
   </style>
 </head>
 <body>
 <main>
-  <aside>
+  <header>
     <h1>Smart Project Allocation</h1>
-    <p>A simple place for students and faculty to take part in the college project allocation process.</p>
-    <p>Sign in to continue, or create a student account to get started.</p>
-  </aside>
+    <p>A simple platform for choosing and allocating college projects.</p>
+  </header>
   <section>
     <div id="authPanel">
       <h2>Welcome</h2>
@@ -43,29 +41,73 @@
         <button class="primary" type="submit">Create student account</button>
       </form>
       <p id="message" class="message" role="status"></p>
-      <p class="hint">Demo accounts are listed in the README. Public registration creates student accounts only.</p>
+      <p class="hint">Public registration creates student accounts only. Faculty and admin use the demo accounts in the README.</p>
     </div>
+
     <div id="dashboard" class="hidden">
-      <h2>You're signed in</h2>
-      <div class="dashboard">
-        <p id="welcome"></p><p id="role"></p>
-        <p id="roleInfo" class="hint"></p>
+      <div class="toolbar">
+        <div><h2 id="welcome" style="margin:0 0 6px"></h2><span id="role" class="badge"></span></div>
+        <button id="logoutButton" type="button">Log out</button>
       </div>
-      <button id="logoutButton" class="primary" type="button">Log out</button>
+      <p id="dashboardMessage" class="message" role="status"></p>
+
+      <div id="studentPanel" class="hidden">
+        <div class="panel">
+          <h3>Available projects</h3>
+          <p class="hint">Enter preference numbers (1 = first choice). Leave a project blank or enter 0 to skip it. You can rank up to five projects.</p>
+          <div id="projectChoices"></div>
+          <button id="savePreferences" class="primary" type="button">Save my preferences</button>
+        </div>
+        <div class="panel"><h3>My allocation</h3><div id="myAllocation" class="hint">No allocation yet.</div></div>
+      </div>
+
+      <div id="staffPanel" class="hidden">
+        <div class="grid">
+          <div class="panel">
+            <h3>Add a project</h3>
+            <form id="projectForm">
+              <label>Project title</label><input name="title" required maxlength="160">
+              <label>Description</label><textarea name="description" required></textarea>
+              <label>Required skills (optional)</label><input name="requiredSkills" placeholder="Java, database">
+              <label>Maximum team members</label><input name="maxMembers" type="number" min="1" max="100" value="4" required>
+              <button class="primary" type="submit">Add project</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Projects</h3><div id="staffProjects" class="hint">Loading projects…</div>
+            <div id="adminControls" class="hidden">
+              <hr style="border:0;border-top:1px solid #e5e9f0;margin:18px 0">
+              <h3>Run allocation</h3>
+              <p class="hint">Assign each student their highest available ranked choice.</p>
+              <button id="runAllocation" class="primary" type="button">Run allocation</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><h3>Allocation results</h3><div id="allocationResults" class="hint">Run allocation to see results here.</div></div>
+      </div>
     </div>
   </section>
 </main>
 <script>
-const API='/api/auth';let token=null;
+const API='/api';let token=null;let currentUser=null;let projects=[];
 const $=id=>document.getElementById(id);
-function showMessage(text,isError=true){$('message').textContent=text;$('message').style.color=isError?'#b42318':'#18794e'}
+function showMessage(text,isError=true){$('message').textContent=text;$('message').className='message'+(isError?'':' success')}
+function dashboardMessage(text,isError=true){$('dashboardMessage').textContent=text;$('dashboardMessage').className='message'+(isError?'':' success')}
 function showTab(register){$('loginForm').classList.toggle('hidden',register);$('registerForm').classList.toggle('hidden',!register);$('loginTab').classList.toggle('active',!register);$('registerTab').classList.toggle('active',register);showMessage('')}
-async function send(path,data,auth=false){const response=await fetch(API+path,{method:data?'POST':'GET',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+token}:{})},...(data?{body:JSON.stringify(data)}:{})});if(response.status===204)return null;const result=await response.json().catch(()=>({message:'Unexpected server response'}));if(!response.ok)throw new Error(result.message||'Request failed');return result}
-function openDashboard(user){$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('welcome').textContent='Welcome, '+user.fullName;$('role').textContent='Account type: '+user.role;$('roleInfo').textContent=user.role==='STUDENT'?'You can submit project preferences when the allocation module is available.':user.role==='FACULTY'?'Faculty account: project management will be available in the next module.':'Administrator account: allocation controls will be available in the next module.'}
+async function api(path,{method='GET',body=null,auth=true}={}){const response=await fetch(API+path,{method,headers:{...(body?{'Content-Type':'application/json'}:{}),...(auth&&token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});if(response.status===204)return null;const result=await response.json().catch(()=>({message:'Unexpected server response'}));if(!response.ok)throw new Error(result.message||'Request failed');return result}
+function openDashboard(user){currentUser=user;$('authPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('welcome').textContent='Welcome, '+user.fullName;$('role').textContent=user.role;$('studentPanel').classList.toggle('hidden',user.role!=='STUDENT');$('staffPanel').classList.toggle('hidden',user.role==='STUDENT');$('adminControls').classList.toggle('hidden',user.role!=='ADMIN');if(user.role==='STUDENT')loadStudent();else loadStaff()}
+async function loadProjects(){projects=await api('/projects');return projects}
+function addProjectChoice(project,rank){const row=document.createElement('div');row.className='project';const details=document.createElement('div');const title=document.createElement('h3');title.textContent=project.title;const description=document.createElement('div');description.className='muted';description.textContent=project.description+' · '+project.seatsAvailable+' seat(s) available';details.append(title,description);const input=document.createElement('input');input.type='number';input.min='0';input.max='5';input.placeholder='0';input.value=rank||'';input.dataset.projectId=project.id;input.setAttribute('aria-label','Preference rank for '+project.title);row.append(details,input);$('projectChoices').append(row)}
+async function loadStudent(){try{const [list,preferences,allocation]=await Promise.all([loadProjects(),api('/preferences/me'),api('/allocation/me')]);$('projectChoices').replaceChildren();const ranks=new Map(preferences.map(p=>[Number(p.projectId),p.rank]));list.forEach(p=>addProjectChoice(p,ranks.get(Number(p.id))));$('myAllocation').textContent=allocation.length?allocation[0].title+' — supervised by '+allocation[0].facultyName:'No allocation yet. Your result will appear here after the admin runs allocation.'}catch(err){dashboardMessage(err.message)}}
+async function loadStaff(){try{const list=await loadProjects();$('staffProjects').replaceChildren();if(!list.length){$('staffProjects').textContent='No projects added yet.'}else list.forEach(p=>{const item=document.createElement('p');item.textContent=p.title+' — '+p.seatsAvailable+'/'+p.maxMembers+' seats available';$('staffProjects').append(item)});if(currentUser.role==='ADMIN')await loadAllocations()}catch(err){dashboardMessage(err.message)}}
+async function loadAllocations(){try{const rows=await api('/allocation');const target=$('allocationResults');target.replaceChildren();if(!rows.length){target.textContent='No allocation results yet.';return}const table=document.createElement('table');const head=document.createElement('tr');['Student','Roll number','Project','Preference'].forEach(v=>{const th=document.createElement('th');th.textContent=v;head.append(th)});const thead=document.createElement('thead');thead.append(head);const tbody=document.createElement('tbody');rows.forEach(r=>{const tr=document.createElement('tr');[r.studentName,r.rollNumber,r.projectTitle,r.preferenceRank||'—'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});tbody.append(tr)});table.append(thead,tbody);const wrap=document.createElement('div');wrap.className='tablewrap';wrap.append(table);target.append(wrap)}catch(err){$('allocationResults').textContent=err.message}}
 $('loginTab').onclick=()=>showTab(false);$('registerTab').onclick=()=>showTab(true);
-$('loginForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{const result=await send('/login',data);token=result.token;openDashboard(result.user)}catch(err){showMessage(err.message)}};
-$('registerForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{await send('/register',data);showTab(false);$('loginForm').elements.email.value=data.email;showMessage('Account created. Please sign in.',false)}catch(err){showMessage(err.message)}};
-$('logoutButton').onclick=async()=>{try{await send('/logout',null,true)}catch(err){}token=null;$('dashboard').classList.add('hidden');$('authPanel').classList.remove('hidden');showMessage('You have been logged out.',false)};
+$('loginForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{const result=await api('/auth/login',{method:'POST',body:data,auth:false});token=result.token;openDashboard(result.user)}catch(err){showMessage(err.message)}};
+$('registerForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));try{await api('/auth/register',{method:'POST',body:data,auth:false});showTab(false);$('loginForm').elements.email.value=data.email;showMessage('Account created. Please sign in.',false)}catch(err){showMessage(err.message)}};
+$('logoutButton').onclick=async()=>{try{await api('/auth/logout',{method:'POST'})}catch(err){}token=null;currentUser=null;$('dashboard').classList.add('hidden');$('authPanel').classList.remove('hidden');showTab(false);showMessage('You have been logged out.',false)};
+$('savePreferences').onclick=async()=>{const inputs=[...$('projectChoices').querySelectorAll('input')];const chosen=inputs.filter(i=>Number(i.value)>0);const ranks=chosen.map(i=>Number(i.value));if(new Set(ranks).size!==ranks.length||ranks.some(n=>n<1||n>5)){dashboardMessage('Use a different rank from 1 to 5 for each selected project.');return}chosen.sort((a,b)=>Number(a.value)-Number(b.value));try{const result=await api('/preferences/me',{method:'PUT',body:{projectIds:chosen.map(i=>Number(i.dataset.projectId))}});dashboardMessage(result.message,false);await loadStudent()}catch(err){dashboardMessage(err.message)}};
+$('projectForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.maxMembers=Number(data.maxMembers);try{await api('/projects',{method:'POST',body:data});e.target.reset();e.target.elements.maxMembers.value=4;dashboardMessage('Project added successfully.',false);await loadStaff()}catch(err){dashboardMessage(err.message)}};
+$('runAllocation').onclick=async()=>{if(!confirm('Run allocation now? This replaces the previous allocation results.'))return;try{const result=await api('/allocation/run',{method:'POST'});dashboardMessage('Allocation completed: '+result.allocatedStudents+' allocated, '+result.unallocatedStudents+' unallocated.',false);await loadAllocations()}catch(err){dashboardMessage(err.message)}};
 </script>
 </body>
 </html>
