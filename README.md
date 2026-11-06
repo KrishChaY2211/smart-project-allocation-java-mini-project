@@ -1,6 +1,6 @@
 # Smart Project Allocation and Team Collaboration Platform
 
-A Java mini-project for transparent academic project allocation and student–faculty collaboration.
+A **small, working college mini-project** that demonstrates how students can choose projects and how a faculty/admin user can allocate them fairly. The goal is a clear end-to-end classroom demo—not a production-grade platform.
 
 ## Phase 1: Foundation
 
@@ -82,19 +82,29 @@ The schema is currently initialised by Spring SQL initialisation. Before adding 
 ### Current scope
 Phase 1 is infrastructure only. Authentication, dashboards, project CRUD, preference submission and the allocation engine are not implemented yet. They will be added in later phases.
 
-## Project phases
-1. Foundation and database connectivity
-2. User management and role-based access
-3. Project catalogue and student preferences
-4. Hybrid allocation engine
-5. Team formation
-6. Collaboration, chat and notifications
-7. Reports, testing and final documentation
+## Simple project plan
+
+We are keeping this as a college working model. Each phase should result in something we can run and demonstrate.
+
+| Phase | What we will build | Completion check |
+|---|---|---|
+| 1. Make the application run | Spring Boot backend, PostgreSQL database and health check | App starts and connects to the database |
+| 2. Basic accounts | Student registration/login; simple faculty/admin demo accounts | Each role can sign in and see the appropriate page |
+| 3. Main allocation workflow | Faculty/admin adds projects and seat limits; students rank project preferences; admin runs allocation | Students are assigned according to their preferences and available seats |
+| 4. Finish the college demo | Show project/team lists and allocation results; add a small team discussion/chat feature only if it is stable; test and prepare demo instructions | A complete student-to-allocation workflow can be demonstrated from the UI |
+
+### What we are deliberately NOT building
+- No microservices, cloud deployment or production-scale infrastructure.
+- No AI/ML recommendation engine or complicated optimisation algorithm.
+- No elaborate notification system, live location tracking or advanced analytics.
+- No complicated real-time chat infrastructure. A basic discussion feature is enough if time permits.
+
+**Priority:** a simple interface and a reliable working flow. If a feature risks breaking the demo or taking too much time, we leave it out and document it as future scope.
 
 
-## Phase 2: Basic student accounts (in progress)
+## Current implementation: Basic student accounts (in progress)
 
-The first user-management slice is implemented:
+The first account feature is implemented:
 - Student registration creates both an app user and student profile.
 - Passwords are hashed with BCrypt; plain-text passwords are never stored.
 - Login creates a 12-hour bearer session. Only a SHA-256 hash of the session token is stored in PostgreSQL.
