@@ -26,6 +26,8 @@ From the repository root:
 ```bash
 docker compose up -d db
 docker compose ps
+
+For Fedora with Podman, use `podman-compose up -d db` instead. The image is pinned to Docker Hub explicitly so Podman does not try Fedora's registry.
 ```
 
 Wait until the database container reports healthy.
@@ -38,6 +40,8 @@ export DB_URL=jdbc:postgresql://localhost:5432/project_allocation
 export DB_USERNAME=allocation
 export DB_PASSWORD=allocation_dev
 mvn spring-boot:run
+
+If port 8080 is already occupied, run `SERVER_PORT=8081 mvn spring-boot:run` and open http://localhost:8081/.
 ```
 
 The API starts at http://localhost:8080.
@@ -102,7 +106,7 @@ We are keeping this as a college working model. Each phase should result in some
 **Priority:** a simple interface and a reliable working flow. If a feature risks breaking the demo or taking too much time, we leave it out and document it as future scope.
 
 
-## Current implementation: Basic student accounts (in progress)
+## Phase 2: Basic student accounts (completed and manually tested)
 
 The first account feature is implemented:
 - Student registration creates both an app user and student profile.
@@ -174,5 +178,53 @@ These are local classroom-demo credentials only. Change them through the `DEMO_A
 - [x] Faculty and admin demo accounts seeded from configuration.
 - [x] BCrypt password hashes and hashed session-token storage.
 - [x] Role is shown on the signed-in dashboard.
-- [ ] Automated CI verification of the complete Phase 2 changes.
-- [ ] Manual browser verification against a running local PostgreSQL instance.
+- [x] Automated CI verification passed on GitHub Actions.
+- [x] Manual browser verification completed: student registration/login/logout, invalid password, duplicate email, faculty login and admin login.
+
+
+## Phase 3: Main allocation workflow (implemented; manual testing pending)
+
+The main workflow is now available in the browser dashboard.
+
+### What it does
+- Faculty can add projects with a title, description, optional required skills and maximum team size.
+- Admin can also add projects; they are assigned to the first seeded faculty account by default.
+- Students can view active projects and rank up to five choices. Ranks must be consecutive (1, 2, 3…).
+- Admin can run the allocation. Students are considered in ascending student-record order; each receives their highest-ranked project that still has a seat.
+- Students can view their allocation. Admin can view the allocation results table.
+
+### Phase 3 API
+All endpoints below require the bearer token from `/api/auth/login`, except public registration and login.
+
+| Method | Endpoint | Role | Purpose |
+|---|---|---|---|
+| GET | `/api/projects` | Any signed-in user | List active projects and available seats |
+| POST | `/api/projects` | Faculty or admin | Add a project |
+| GET | `/api/preferences/me` | Student | View saved ranked preferences |
+| PUT | `/api/preferences/me` | Student | Replace ranked preferences |
+| POST | `/api/allocation/run` | Admin | Run or rerun allocation |
+| GET | `/api/allocation/me` | Student | View own assigned project |
+| GET | `/api/allocation` | Faculty or admin | View allocation results |
+
+Preference submission example:
+
+```json
+{
+  "projectIds": [2, 1, 3]
+}
+```
+
+The array order represents preference rank: project 2 is first choice, project 1 is second, and project 3 is third.
+
+### Allocation rule and limitations
+This is a deliberately simple, deterministic demo algorithm—not a globally optimal matching algorithm. It processes students by database ID and tries each student's choices in rank order until it finds a project with a free seat. If every selected project is full, that student remains unallocated. Rerunning allocation replaces the previous results.
+
+### Phase 3 manual acceptance checklist
+- [ ] Faculty can add a project and it appears in the catalogue.
+- [ ] A student can save ranked preferences and reload them.
+- [ ] Admin can run allocation and see the result counts.
+- [ ] Students can view their assigned project.
+- [ ] Capacity is respected when multiple students choose the same project.
+- [ ] A student with no available preferred project remains unallocated.
+
+Phase 3 is not marked complete until these checks and the GitHub Actions run have been verified.
