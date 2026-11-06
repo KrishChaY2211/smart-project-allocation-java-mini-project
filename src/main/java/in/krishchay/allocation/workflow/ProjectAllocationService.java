@@ -113,6 +113,26 @@ public class ProjectAllocationService {
                 """, studentId);
     }
 
+    public List<Map<String, Object>> listSubmittedPreferences(String authorization) {
+        Long userId = auth.authenticatedUserId(authorization);
+        String role = roleOf(userId);
+        if (!role.equals("ADMIN") && !role.equals("FACULTY")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only faculty or admin can view submitted preferences");
+        }
+        return jdbc.queryForList("""
+                SELECT u.full_name AS "studentName", s.roll_number AS "rollNumber",
+                       s.department, p.title AS "projectTitle",
+                       pp.preference_rank AS "preferenceRank"
+                FROM project_preferences pp
+                JOIN students s ON s.id = pp.student_id
+                JOIN app_users u ON u.id = s.user_id
+                JOIN projects p ON p.id = pp.project_id
+                WHERE p.active = TRUE
+                ORDER BY s.roll_number, pp.preference_rank
+                """);
+    }
+
     @Transactional
     public Map<String, Object> runAllocation(String authorization) {
         requireRole(authorization, "ADMIN");

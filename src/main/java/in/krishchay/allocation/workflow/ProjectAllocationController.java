@@ -43,6 +43,12 @@ public class ProjectAllocationController {
         return service.getMyPreferences(authorization);
     }
 
+    @GetMapping("/preferences")
+    public List<Map<String, Object>> submittedPreferences(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        return service.listSubmittedPreferences(authorization);
+    }
+
     @PostMapping("/allocation/run")
     public Map<String, Object> runAllocation(
             @RequestHeader(value = "Authorization", required = false) String authorization) {

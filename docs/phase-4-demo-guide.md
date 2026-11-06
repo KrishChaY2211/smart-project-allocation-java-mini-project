@@ -46,6 +46,8 @@ Register at least two student accounts from the registration tab. Use different 
 3. Add a second project named **Campus Event Portal**, also with a maximum team size of **1**.
 4. Confirm both projects appear with their descriptions, required skills and available seats.
 
+Create the first student account before the second so the simple allocation order is predictable for this demonstration.
+
 ### B. Students submit preferences
 
 1. Sign in as the first student and rank Library Management System as 1 and Campus Event Portal as 2.
@@ -53,9 +55,13 @@ Register at least two student accounts from the registration tab. Use different 
 3. Sign in as the second student and rank Library Management System as 1.
 4. Save preferences.
 
-Create the first student account before the second so the simple allocation order is predictable for this demonstration.
+### C. Faculty reviews submitted preferences
 
-### C. Admin runs allocation
+1. Sign in as faculty.
+2. Open **Submitted student preferences**.
+3. Confirm both students' choices, roll numbers, departments and preference ranks are visible. Use **Refresh** after students submit or change their choices.
+
+### D. Admin runs allocation
 
 1. Sign in as admin.
 2. Select **Run allocation** and confirm.
@@ -64,7 +70,7 @@ Create the first student account before the second so the simple allocation orde
 
 The results table should show both students, their roll numbers, assigned projects and preference ranks.
 
-### D. Students inspect their teams
+### E. Students inspect their teams
 
 1. Sign in as each student.
 2. Open **My allocation**.
@@ -80,6 +86,7 @@ For a project with a capacity of one, the team list contains only that student. 
 - [ ] Faculty can add projects.
 - [ ] Project details and available seats are visible.
 - [ ] Students can save and reload ranked preferences.
+- [ ] Faculty can review submitted student preferences before allocation.
 - [ ] Admin can run allocation.
 - [ ] Allocation results respect project capacity.
 - [ ] Admin and faculty can view allocation results.

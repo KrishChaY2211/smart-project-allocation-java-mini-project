@@ -200,7 +200,8 @@ The main workflow is now available in the browser dashboard.
 - Admin can also add projects; they are assigned to the first seeded faculty account by default.
 - Students can view active projects and rank up to five choices. Ranks must be consecutive (1, 2, 3…).
 - Admin can run the allocation. Students are considered in ascending student-record order; each receives their highest-ranked project that still has a seat.
-- Students can view their allocation. Admin can view the allocation results table.
+- Faculty and admin can review all submitted student preferences before allocation.
+- Students can view their allocation. Faculty and admin can view the allocation results table.
 
 ### Phase 3 API
 All endpoints below require the bearer token from `/api/auth/login`, except public registration and login.
@@ -210,6 +211,7 @@ All endpoints below require the bearer token from `/api/auth/login`, except publ
 | GET | `/api/projects` | Any signed-in user | List active projects and available seats |
 | POST | `/api/projects` | Faculty or admin | Add a project |
 | GET | `/api/preferences/me` | Student | View saved ranked preferences |
+| GET | `/api/preferences` | Faculty or admin | Review all submitted student preferences |
 | PUT | `/api/preferences/me` | Student | Replace ranked preferences |
 | POST | `/api/allocation/run` | Admin | Run or rerun allocation |
 | GET | `/api/allocation/me` | Student | View own assigned project |
@@ -233,6 +235,7 @@ This is a deliberately simple, deterministic demo algorithm—not a globally opt
 - [x] GitHub Actions Java 21 build and automated tests passed (run 29).
 - [ ] Faculty can add a project and it appears in the catalogue.
 - [ ] A student can save ranked preferences and reload them.
+- [ ] Faculty can review each student's submitted project choices and preference ranks.
 - [ ] Admin can run allocation and see the result counts.
 - [ ] Students can view their assigned project.
 - [ ] Capacity is respected when multiple students choose the same project.
@@ -248,6 +251,7 @@ This is the final planned phase. It focuses on making the existing workflow easi
 ### Final dashboard improvements
 - Students see their allocated project description, faculty supervisor and the names/roll numbers of their allocated teammates.
 - Faculty and admin dashboards show project descriptions, required skills, supervisor and remaining team capacity.
+- Faculty and admin can review submitted student preferences before allocation, including student name, roll number, department, project and rank.
 - Faculty and admin can inspect the allocation results table.
 - The existing admin-only allocation button remains restricted to admin users.
 
@@ -262,6 +266,7 @@ A chat/discussion feature is not included. It is not required to demonstrate pro
 - [ ] Student registration, login and logout work.
 - [ ] Faculty can add projects and view project details.
 - [ ] Students can save and reload ranked preferences.
+- [ ] Faculty can view submitted student preferences before allocation.
 - [ ] Admin can run allocation and inspect the results.
 - [ ] Each student sees their allocated project and team members.
 - [ ] No project exceeds its configured capacity.
