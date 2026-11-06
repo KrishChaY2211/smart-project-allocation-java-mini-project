@@ -4,28 +4,34 @@ A Java mini-project for transparent academic project allocation and student–fa
 
 ## Phase 1: Foundation
 
-This phase establishes a runnable Spring Boot backend, PostgreSQL connectivity through Spring JDBC, database schema initialization, and health endpoints.
+This phase establishes a runnable Spring Boot backend, PostgreSQL connectivity through Spring JDBC, database schema initialization, health endpoints, and automated CI testing.
 
 ### Technology
 - Java 21
-- Spring Boot 3.5.x
-- Spring Web
+- Spring Boot 3.5.6
+- Spring Web (REST API and embedded Tomcat)
 - Spring JDBC (JdbcTemplate)
-- PostgreSQL
+- PostgreSQL 16
 - Maven
+- GitHub Actions
 
 ### Prerequisites
 - JDK 21+
-- Docker Engine with Docker Compose plugin, or a local PostgreSQL 16+ instance
-- Maven (or use the Maven wrapper once generated)
+- Docker Engine with the Docker Compose plugin
+- Maven 3.9+ (or your IDE's Maven integration)
 
-### Run PostgreSQL
+### Start the database
+From the repository root:
+
 ```bash
 docker compose up -d db
+docker compose ps
 ```
 
-### Configure and run the backend
-Copy `.env.example` to `.env` if you use the supplied environment values. Spring reads environment variables directly; export them in your shell:
+Wait until the database container reports healthy.
+
+### Run the backend
+Spring Boot reads configuration from environment variables. The following defaults match the local Docker Compose database:
 
 ```bash
 export DB_URL=jdbc:postgresql://localhost:5432/project_allocation
@@ -34,17 +40,47 @@ export DB_PASSWORD=allocation_dev
 mvn spring-boot:run
 ```
 
-The API starts at `http://localhost:8080`.
+The API starts at http://localhost:8080.
 
-### Verify
-- `GET /api/health` — application status
-- `GET /api/health/database` — PostgreSQL connectivity and database time
+### Verify the API
+- GET /api/health — application status
+- GET /api/health/database — PostgreSQL connectivity, database time, and public table count
 
-### Database
-The schema in `src/main/resources/schema.sql` is initialized by Spring on startup. It currently creates the initial user, student, faculty, project and preference tables. Later phases will add authentication, allocation runs, teams, messages and notifications through versioned migrations.
+Example:
+
+```bash
+curl http://localhost:8080/api/health
+curl http://localhost:8080/api/health/database
+```
+
+### Run tests
+
+```bash
+mvn --batch-mode verify
+```
+
+GitHub Actions runs the same Maven verification against a PostgreSQL 16 service on every push to main and every pull request targeting main.
+
+### Initial database model
+The schema in src/main/resources/schema.sql creates:
+- app_users — common identity and role information
+- students — student profile, roll number, department and skills
+- faculty — faculty profile and project supervision capacity
+- projects — project catalogue, required skills, supervisor and team-size limit
+- project_preferences — ranked student project choices
+
+The schema is currently initialised by Spring SQL initialisation. Before adding production-grade schema evolution, later phases will introduce versioned database migrations.
+
+### Phase 1 acceptance criteria
+- [x] Java 21 / Spring Boot project structure is committed.
+- [x] PostgreSQL configuration and reproducible local database service are present.
+- [x] Initial relational schema and foreign-key/uniqueness constraints are present.
+- [x] Application and database health endpoints are implemented.
+- [x] Automated tests cover healthy endpoints and database-check failure handling.
+- [x] GitHub Actions builds and tests the application with PostgreSQL.
 
 ### Current scope
-Phase 1 is infrastructure only. Authentication, dashboards, project CRUD and the allocation engine are not implemented yet. They will be added in later phases.
+Phase 1 is infrastructure only. Authentication, dashboards, project CRUD, preference submission and the allocation engine are not implemented yet. They will be added in later phases.
 
 ## Project phases
 1. Foundation and database connectivity
