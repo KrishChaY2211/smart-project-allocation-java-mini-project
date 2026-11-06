@@ -6,8 +6,9 @@ Let faculty add project options, let students rank project choices, and let an a
 ## Browser workflow
 1. Sign in as faculty and add projects with a maximum team size.
 2. Register or sign in as a student and rank available projects.
-3. Sign in as admin and run allocation.
-4. Sign back in as students to view the assigned project. Admin can inspect the results table.
+3. Sign in as faculty and review the submitted preferences, including each student's ranked project choices.
+4. Sign in as admin and run allocation.
+5. Sign back in as students to view the assigned project. Faculty and admin can inspect the allocation results table.
 
 ## Allocation rule
 Students are processed in ascending student database ID. For each student, their preferences are checked from rank 1 upward. The first project with a remaining seat is assigned. If all their selected projects are full, the student remains unallocated. Running allocation again clears and recreates the results.
@@ -25,6 +26,7 @@ The new `project_allocations` table is created by the existing SQL schema initia
 - `GET /api/projects`
 - `POST /api/projects` — faculty/admin
 - `GET /api/preferences/me` — student
+- `GET /api/preferences` — faculty/admin; lists submitted preferences with student details and rank
 - `PUT /api/preferences/me` — student; JSON contains `projectIds` in rank order
 - `POST /api/allocation/run` — admin
 - `GET /api/allocation/me` — student
