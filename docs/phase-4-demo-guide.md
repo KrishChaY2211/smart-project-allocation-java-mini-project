@@ -46,6 +46,8 @@ Register at least two student accounts from the registration tab. Use different 
 3. Add a second project named **Campus Event Portal**, also with a maximum team size of **1**.
 4. Confirm both projects appear with their descriptions, required skills and available seats.
 
+Create the first student account before the second so the simple allocation order is predictable for this demonstration.
+
 ### B. Students submit preferences
 
 1. Sign in as the first student and rank Library Management System as 1 and Campus Event Portal as 2.
@@ -68,18 +70,7 @@ Register at least two student accounts from the registration tab. Use different 
 
 The results table should show both students, their roll numbers, assigned projects and preference ranks.
 
-Create the first student account before the second so the simple allocation order is predictable for this demonstration.
-
-### C. Admin runs allocation
-
-1. Sign in as admin.
-2. Select **Run allocation** and confirm.
-3. The allocation rule processes students in database ID order and assigns each student their highest-ranked project that still has a free seat.
-4. With the example above, the first student receives Library Management System and the second receives Campus Event Portal.
-
-The results table should show both students, their roll numbers, assigned projects and preference ranks.
-
-### D. Students inspect their teams
+### E. Students inspect their teams
 
 1. Sign in as each student.
 2. Open **My allocation**.
