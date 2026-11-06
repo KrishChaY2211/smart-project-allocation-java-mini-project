@@ -97,7 +97,7 @@ We are keeping this as a college working model. Each phase should result in some
 | 1. Make the application run | Spring Boot backend, PostgreSQL database and health check | App starts and connects to the database |
 | 2. Basic accounts | Student registration/login; simple faculty/admin demo accounts | Each role can sign in and see the appropriate page |
 | 3. Main allocation workflow | Faculty/admin adds projects and seat limits; students rank project preferences; admin runs allocation | Students are assigned according to their preferences and available seats |
-| 4. Finish the college demo | Show project/team lists and allocation results; add a small team discussion/chat feature only if it is stable; test and prepare demo instructions | A complete student-to-allocation workflow can be demonstrated from the UI |
+| 4. Finish the college demo | Show project details, allocated team members and results; document the final demonstration | The complete workflow is ready for final manual acceptance |
 
 ### What we are deliberately NOT building
 - No microservices, cloud deployment or production-scale infrastructure.
@@ -232,3 +232,32 @@ This is a deliberately simple, deterministic demo algorithm—not a globally opt
 - [ ] A student with no available preferred project remains unallocated.
 
 Phase 3 is not marked complete until these checks and the GitHub Actions run have been verified.
+
+
+## Phase 4: Final college demonstration (implemented; manual testing pending)
+
+This is the final planned phase. It focuses on making the existing workflow easier to demonstrate rather than adding more infrastructure.
+
+### Final dashboard improvements
+- Students see their allocated project description, faculty supervisor and the names/roll numbers of their allocated teammates.
+- Faculty and admin dashboards show project descriptions, required skills, supervisor and remaining team capacity.
+- Faculty and admin can inspect the allocation results table.
+- The existing admin-only allocation button remains restricted to admin users.
+
+### Final demonstration guide
+Follow [docs/phase-4-demo-guide.md](docs/phase-4-demo-guide.md) for setup, demo account details, a suggested two-project/two-student scenario, expected results and the final acceptance checklist.
+
+### Deliberately excluded
+A chat/discussion feature is not included. It is not required to demonstrate project allocation, and adding a messaging feature now would increase scope and testing effort without improving the core college demo.
+
+### Final acceptance checklist
+- [ ] Application starts and connects to PostgreSQL.
+- [ ] Student registration, login and logout work.
+- [ ] Faculty can add projects and view project details.
+- [ ] Students can save and reload ranked preferences.
+- [ ] Admin can run allocation and inspect the results.
+- [ ] Each student sees their allocated project and team members.
+- [ ] No project exceeds its configured capacity.
+- [ ] The final demonstration can be completed using the guide.
+
+Phase 4 implementation is committed, but the complete end-to-end manual acceptance is intentionally left for the project team to perform.
