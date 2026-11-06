@@ -17,3 +17,14 @@ spring:
 logging:
   level:
     in.krishchay.allocation: INFO
+
+# Local classroom demo accounts. Override these values before sharing a deployed instance.
+demo:
+  admin:
+    name: ${DEMO_ADMIN_NAME:Demo Administrator}
+    email: ${DEMO_ADMIN_EMAIL:admin@college.local}
+    password: ${DEMO_ADMIN_PASSWORD:Admin@12345}
+  faculty:
+    name: ${DEMO_FACULTY_NAME:Demo Faculty}
+    email: ${DEMO_FACULTY_EMAIL:faculty@college.local}
+    password: ${DEMO_FACULTY_PASSWORD:Faculty@12345}
