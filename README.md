@@ -10,14 +10,18 @@ This repository contains the backend, browser interface, database setup, automat
 
 ## Project status
 
+<badge>Completed</badge>
+
+**Development status: Finished.** All four planned project phases have been implemented, and the core end-to-end classroom demonstration workflow has been manually tested. This repository represents the final academic mini-project submission; active feature development is concluded.
+
 | Phase | Scope | Status |
 |---|---|---|
 | 1. Foundation | Spring Boot application, PostgreSQL integration, health endpoints and CI | Complete |
 | 2. Accounts | Student registration/login, faculty and admin demo accounts, role-based access | Complete |
 | 3. Allocation workflow | Project management, ranked preferences, preference review and allocation | Complete |
-| 4. Final demonstration | Allocation results, project/team details and end-to-end browser workflow | Implemented and manually tested |
+| 4. Final demonstration | Allocation results, project/team details and end-to-end browser workflow | Complete |
 
-The core classroom demonstration workflow has been implemented and manually tested. This is an academic prototype, not a production-ready deployment.
+This is a completed academic prototype, not a production-ready deployment. The documented limitations below describe the delivered scope, not unfinished development tasks.
 
 ## Features
 
@@ -213,7 +217,7 @@ Or:
 
 GitHub Actions runs Maven verification with a PostgreSQL service on pushes to main and pull requests targeting main.
 
-## Suggested end-to-end demonstration
+## End-to-end demonstration workflow
 
 1. Start PostgreSQL and the application.
 2. Sign in as faculty and create two projects, each with one available seat.
@@ -255,9 +259,9 @@ This project focuses on demonstrating the core academic project-allocation workf
 
 The allocation order is based on student database ID, and a student can remain unallocated when all their ranked choices are full. Demo credentials and local database settings must be changed before deployment in a shared or public environment.
 
-## Future improvements
+## Final project note
 
-Possible extensions include a more equitable matching algorithm, configurable tie-breaking rules, stronger account-administration workflows, automated integration testing, deployment hardening and richer allocation reports.
+The project is complete and is no longer under active development. The implementation, documented setup instructions and demonstration workflow represent the final submitted scope. No further features are planned as part of this mini-project.
 
 ---
 
