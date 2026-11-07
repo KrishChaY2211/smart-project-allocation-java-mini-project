@@ -1,63 +1,196 @@
 # Smart Project Allocation and Team Collaboration Platform
 
-A **small, working college mini-project** that demonstrates how students can choose projects and how a faculty/admin user can allocate them fairly. The goal is a clear end-to-end classroom demo—not a production-grade platform.
+A Java-based college mini-project that helps students choose academic projects and enables faculty and administrators to manage projects, collect student preferences, and allocate limited team seats.
 
-## Phase 1: Foundation
+The application provides an end-to-end browser workflow:
 
-This phase establishes a runnable Spring Boot backend, PostgreSQL connectivity through Spring JDBC, database schema initialization, health endpoints, and automated CI testing.
+**Faculty creates projects → Students rank preferences → Faculty reviews submissions → Admin runs allocation → Students view their assigned projects and teams.**
 
-### Technology
-- Java 21
-- Spring Boot 3.5.6
-- Spring Web (REST API and embedded Tomcat)
-- Spring JDBC (JdbcTemplate)
-- PostgreSQL 16
-- Maven
-- GitHub Actions
+This repository contains the backend, browser interface, database setup, automated tests, and a final demonstration guide.
 
-### Prerequisites
-- JDK 21+
-- Docker Engine with the Docker Compose plugin
-- Maven 3.9+ (or your IDE's Maven integration)
+## Project status
 
-### Start the database
-From the repository root:
+| Phase | Scope | Status |
+|---|---|---|
+| 1. Foundation | Spring Boot application, PostgreSQL integration, health endpoints and CI | Complete |
+| 2. Accounts | Student registration/login, faculty and admin demo accounts, role-based access | Complete |
+| 3. Allocation workflow | Project management, ranked preferences, preference review and allocation | Complete |
+| 4. Final demonstration | Allocation results, project/team details and end-to-end browser workflow | Implemented and manually tested |
+
+The core classroom demonstration workflow has been implemented and manually tested. This is an academic prototype, not a production-ready deployment.
+
+## Features
+
+### Student
+- Register an account and sign in.
+- Browse active projects, descriptions, required skills and available seats.
+- Submit and update up to five ranked project preferences.
+- View saved preferences.
+- View the allocated project, project description, faculty supervisor and allocated teammates.
+- Log out.
+
+### Faculty
+- Sign in using the configured faculty demo account.
+- Create projects with descriptions, optional required skills and maximum team size.
+- View project details and remaining capacity.
+- Review submitted student preferences, including student name, roll number, department, selected project and preference rank.
+- View allocation results.
+
+### Admin
+- Sign in using the configured admin demo account.
+- Create projects.
+- Review submitted preferences and allocation results.
+- Run or rerun the allocation process.
+
+## Technology stack
+
+| Area | Technology |
+|---|---|
+| Programming language | Java 21 |
+| Backend framework | Spring Boot 3.5.6 |
+| Web layer | Spring Web, REST APIs, embedded Tomcat |
+| Database access | Spring JDBC (JdbcTemplate) |
+| Database | PostgreSQL 16 |
+| Authentication support | BCrypt password hashing and opaque bearer sessions |
+| Frontend | HTML, CSS and JavaScript |
+| Build and dependency management | Maven |
+| Automated testing | Spring Boot Test / JUnit |
+| CI | GitHub Actions |
+| Local database environment | Docker Compose or Podman Compose |
+
+## How allocation works
+
+The project uses a deliberately simple, deterministic preference-and-capacity algorithm:
+
+1. Students are processed in ascending database-record ID order.
+2. For each student, the system checks submitted preferences from highest to lowest rank.
+3. The student is assigned to the first project that still has an available seat.
+4. If all of the student's selected projects are full, the student remains unallocated.
+5. Rerunning allocation replaces the previous allocation results.
+
+This approach is easy to explain and demonstrate, but it is **not a globally optimal matching algorithm**. Students with earlier database IDs are considered first.
+
+## Requirements
+
+- JDK 21 or newer
+- Docker Engine with the Docker Compose plugin, or Podman with podman-compose
+- Maven 3.9+ (optional if using the included Maven wrapper)
+- Git
+
+## Run locally
+
+Run all commands from the repository root.
+
+### 1. Start PostgreSQL
+
+With Docker:
 
 ```bash
 docker compose up -d db
 docker compose ps
 ```
 
-For Fedora with Podman, use:
+With Podman on Fedora:
 
 ```bash
 podman-compose up -d db
 podman ps
 ```
 
-The image is pinned to Docker Hub explicitly so Podman does not try Fedora's registry.
+Wait until the database container is healthy before starting the backend.
 
-Wait until the database container reports healthy.
+### 2. Configure the database
 
-### Run the backend
-Spring Boot reads configuration from environment variables. The following defaults match the local Docker Compose database:
+The default local development configuration is:
 
 ```bash
 export DB_URL=jdbc:postgresql://localhost:5432/project_allocation
 export DB_USERNAME=allocation
 export DB_PASSWORD=allocation_dev
+```
+
+These are local development credentials. Do not reuse them in a public deployment.
+
+### 3. Start the application
+
+Using Maven:
+
+```bash
 mvn spring-boot:run
 ```
 
-The API starts at http://localhost:8080. If port 8080 is already occupied, run this instead and open http://localhost:8081/:
+Or, if the repository's Maven wrapper is available:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Open **http://localhost:8080/** in your browser.
+
+If port 8080 is occupied, start the application on port 8081:
 
 ```bash
 SERVER_PORT=8081 mvn spring-boot:run
 ```
 
-### Verify the API
-- GET /api/health — application status
-- GET /api/health/database — PostgreSQL connectivity, database time, and public table count
+Then open **http://localhost:8081/**.
+
+### 4. Demo accounts
+
+The application seeds local classroom demo accounts on startup when the configured email addresses do not already exist.
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@college.local | Admin@12345 |
+| Faculty | faculty@college.local | Faculty@12345 |
+
+These credentials are for local demonstration only. Configure different values through the DEMO_ADMIN_* and DEMO_FACULTY_* environment variables before any deployment beyond a local classroom environment.
+
+Students can register through the application. Public registration always creates a student account; it cannot grant faculty or admin privileges.
+
+## Authentication and security notes
+
+- Passwords are stored as BCrypt hashes, not plain text.
+- Login creates a time-limited bearer session (12 hours).
+- Only a SHA-256 hash of the session token is stored in PostgreSQL.
+- Authenticated requests use the Authorization: Bearer <token> header.
+- The current-user endpoint validates the session, and logout ends it.
+- Public student registration cannot create privileged roles.
+
+These are useful baseline protections for an academic prototype. The application has not been hardened or independently audited for production use.
+
+## API overview
+
+Except for registration and login, the endpoints below require an authenticated bearer token.
+
+### Authentication
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | /api/auth/register | Register a student |
+| POST | /api/auth/login | Log in and receive a bearer token |
+| GET | /api/auth/me | Get the current account |
+| POST | /api/auth/logout | End the current session |
+
+### Projects, preferences and allocation
+
+| Method | Endpoint | Access | Purpose |
+|---|---|---|---|
+| GET | /api/projects | Signed-in users | List active projects and available seats |
+| POST | /api/projects | Faculty, admin | Create a project |
+| GET | /api/preferences/me | Student | View own saved preferences |
+| PUT | /api/preferences/me | Student | Save or replace ranked preferences |
+| GET | /api/preferences | Faculty, admin | Review submitted student preferences |
+| POST | /api/allocation/run | Admin | Run or rerun allocation |
+| GET | /api/allocation/me | Student | View own allocation |
+| GET | /api/allocation | Faculty, admin | View allocation results |
+
+### Health checks
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | /api/health | Application health |
+| GET | /api/health/database | Database connectivity and database status |
 
 Example:
 
@@ -66,210 +199,68 @@ curl http://localhost:8080/api/health
 curl http://localhost:8080/api/health/database
 ```
 
-### Run tests
+## Run tests
 
 ```bash
 mvn --batch-mode verify
 ```
 
-GitHub Actions runs the same Maven verification against a PostgreSQL 16 service on every push to main and every pull request targeting main.
+Or:
 
-### Initial database model
-The schema in src/main/resources/schema.sql creates:
-- app_users — common identity and role information
-- students — student profile, roll number, department and skills
-- faculty — faculty profile and project supervision capacity
-- projects — project catalogue, required skills, supervisor and team-size limit
-- project_preferences — ranked student project choices
-
-The schema is currently initialised by Spring SQL initialisation. Before adding production-grade schema evolution, later phases will introduce versioned database migrations.
-
-### Phase 1 acceptance criteria
-- [x] Java 21 / Spring Boot project structure is committed.
-- [x] PostgreSQL configuration and reproducible local database service are present.
-- [x] Initial relational schema and foreign-key/uniqueness constraints are present.
-- [x] Application and database health endpoints are implemented.
-- [x] Automated tests cover healthy endpoints and database-check failure handling.
-- [x] GitHub Actions builds and tests the application with PostgreSQL.
-
-### Current scope
-Phase 1 is infrastructure only. Authentication, dashboards, project CRUD, preference submission and the allocation engine are not implemented yet. They will be added in later phases.
-
-## Simple project plan
-
-We are keeping this as a college working model. Each phase should result in something we can run and demonstrate.
-
-| Phase | What we will build | Completion check |
-|---|---|---|
-| 1. Make the application run | Spring Boot backend, PostgreSQL database and health check | App starts and connects to the database |
-| 2. Basic accounts | Student registration/login; simple faculty/admin demo accounts | Each role can sign in and see the appropriate page |
-| 3. Main allocation workflow | Faculty/admin adds projects and seat limits; students rank project preferences; admin runs allocation | Students are assigned according to their preferences and available seats |
-| 4. Finish the college demo | Show project details, allocated team members and results; document the final demonstration | The complete workflow is ready for final manual acceptance |
-
-### What we are deliberately NOT building
-- No microservices, cloud deployment or production-scale infrastructure.
-- No AI/ML recommendation engine or complicated optimisation algorithm.
-- No elaborate notification system, live location tracking or advanced analytics.
-- No complicated real-time chat infrastructure. A basic discussion feature is enough if time permits.
-
-**Priority:** a simple interface and a reliable working flow. If a feature risks breaking the demo or taking too much time, we leave it out and document it as future scope.
-
-
-## Phase 2: Basic student accounts (completed and manually tested)
-
-The first account feature is implemented:
-- Student registration creates both an app user and student profile.
-- Passwords are hashed with BCrypt; plain-text passwords are never stored.
-- Login creates a 12-hour bearer session. Only a SHA-256 hash of the session token is stored in PostgreSQL.
-- The current-user endpoint validates the bearer session.
-- Logout deletes the session.
-- Public registration always creates the STUDENT role. It does not accept a role from the client.
-
-### Authentication API
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/api/auth/register` | Register a student |
-| POST | `/api/auth/login` | Log in and receive a bearer token |
-| GET | `/api/auth/me` | Get the current account (send `Authorization: Bearer <token>`) |
-| POST | `/api/auth/logout` | End the current session |
-
-Registration JSON example:
-
-```json
-{
-  "fullName": "Asha Rao",
-  "email": "asha@example.com",
-  "password": "a-strong-password",
-  "rollNumber": "CSE001",
-  "department": "CSE",
-  "skills": "Java, Python"
-}
+```bash
+./mvnw --batch-mode verify
 ```
 
-Login JSON example:
+GitHub Actions runs Maven verification with a PostgreSQL service on pushes to main and pull requests targeting main.
 
-```json
-{
-  "email": "asha@example.com",
-  "password": "a-strong-password"
-}
+## Suggested end-to-end demonstration
+
+1. Start PostgreSQL and the application.
+2. Sign in as faculty and create two projects, each with one available seat.
+3. Register two student accounts.
+4. Have the first student rank Project A first and Project B second.
+5. Have the second student rank Project A first.
+6. Sign in as faculty and confirm both students' submitted preferences are visible.
+7. Sign in as admin and run allocation.
+8. Verify that the first student receives Project A and the second receives Project B.
+9. Sign in as each student and inspect the assigned project and team details.
+
+See [docs/phase-4-demo-guide.md](docs/phase-4-demo-guide.md) for the detailed setup, example scenario and presentation sequence.
+
+## Repository structure
+
+```text
+.
+├── .github/                 # GitHub Actions and repository templates
+├── docs/                    # Project and demonstration documentation
+│   └── phase-4-demo-guide.md
+├── src/
+│   ├── main/
+│   │   ├── java/             # Spring Boot application and API
+│   │   └── resources/        # Application configuration and database schema
+│   └── test/                 # Automated tests
+├── compose.yaml              # Local PostgreSQL service
+├── pom.xml                  # Maven project configuration
+└── README.md
 ```
 
-The login response includes a bearer token. Send it in the Authorization header for the `/me` and `/logout` endpoints. Faculty and admin account creation will be added through a controlled admin workflow, not public registration.
+## Scope and known limitations
 
+This project focuses on demonstrating the core academic project-allocation workflow. It intentionally does not include:
 
-## Phase 2: Basic accounts and sign-in page
+- A globally optimal or AI/ML-based allocation algorithm.
+- Microservices, cloud infrastructure or production-scale deployment.
+- Real-time chat, notifications or a mobile application.
+- Advanced analytics or a complex recommendation engine.
 
-Phase 2 adds a small browser-based entry point and demo accounts for the college presentation.
+The allocation order is based on student database ID, and a student can remain unallocated when all their ranked choices are full. Demo credentials and local database settings must be changed before deployment in a shared or public environment.
 
-### Open the application
+## Future improvements
 
-Start PostgreSQL and the backend using the Phase 1 instructions, then open:
+Possible extensions include a more equitable matching algorithm, configurable tie-breaking rules, stronger account-administration workflows, automated integration testing, deployment hardening and richer allocation reports.
 
-`http://localhost:8080/`
+---
 
-Students can register from the page and then sign in. Faculty and admin use the demo accounts below. The dashboard displays the signed-in user's role.
-
-### Demo accounts
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@college.local` | `Admin@12345` |
-| Faculty | `faculty@college.local` | `Faculty@12345` |
-
-These are local classroom-demo credentials only. Change them through the `DEMO_ADMIN_*` and `DEMO_FACULTY_*` environment variables before using the app anywhere beyond a local demo. The accounts are created on startup if their email addresses do not already exist. Public student registration cannot create privileged roles.
-
-### Phase 2 acceptance checklist
-
-- [x] Student registration API and browser form.
-- [x] Student login and logout.
-- [x] Faculty and admin demo accounts seeded from configuration.
-- [x] BCrypt password hashes and hashed session-token storage.
-- [x] Role is shown on the signed-in dashboard.
-- [x] Automated CI verification passed on GitHub Actions.
-- [x] Manual browser verification completed: student registration/login/logout, invalid password, duplicate email, faculty login and admin login.
-
-
-## Phase 3: Main allocation workflow (implemented; manual testing pending)
-
-The main workflow is now available in the browser dashboard.
-
-### What it does
-- Faculty can add projects with a title, description, optional required skills and maximum team size.
-- Admin can also add projects; they are assigned to the first seeded faculty account by default.
-- Students can view active projects and rank up to five choices. Ranks must be consecutive (1, 2, 3…).
-- Admin can run the allocation. Students are considered in ascending student-record order; each receives their highest-ranked project that still has a seat.
-- Faculty and admin can review all submitted student preferences before allocation.
-- Students can view their allocation. Faculty and admin can view the allocation results table.
-
-### Phase 3 API
-All endpoints below require the bearer token from `/api/auth/login`, except public registration and login.
-
-| Method | Endpoint | Role | Purpose |
-|---|---|---|---|
-| GET | `/api/projects` | Any signed-in user | List active projects and available seats |
-| POST | `/api/projects` | Faculty or admin | Add a project |
-| GET | `/api/preferences/me` | Student | View saved ranked preferences |
-| GET | `/api/preferences` | Faculty or admin | Review all submitted student preferences |
-| PUT | `/api/preferences/me` | Student | Replace ranked preferences |
-| POST | `/api/allocation/run` | Admin | Run or rerun allocation |
-| GET | `/api/allocation/me` | Student | View own assigned project |
-| GET | `/api/allocation` | Faculty or admin | View allocation results |
-
-Preference submission example:
-
-```json
-{
-  "projectIds": [2, 1, 3]
-}
-```
-
-The array order represents preference rank: project 2 is first choice, project 1 is second, and project 3 is third.
-
-### Allocation rule and limitations
-This is a deliberately simple, deterministic demo algorithm—not a globally optimal matching algorithm. It processes students by database ID and tries each student's choices in rank order until it finds a project with a free seat. If every selected project is full, that student remains unallocated. Rerunning allocation replaces the previous results.
-
-### Phase 3 verification and manual acceptance checklist
-
-- [x] GitHub Actions Java 21 build and automated tests passed (run 29).
-- [ ] Faculty can add a project and it appears in the catalogue.
-- [ ] A student can save ranked preferences and reload them.
-- [ ] Faculty can review each student's submitted project choices and preference ranks.
-- [ ] Admin can run allocation and see the result counts.
-- [ ] Students can view their assigned project.
-- [ ] Capacity is respected when multiple students choose the same project.
-- [ ] A student with no available preferred project remains unallocated.
-
-Phase 3 is not marked complete until these checks and the GitHub Actions run have been verified.
-
-
-## Phase 4: Final college demonstration (implemented; manual testing pending)
-
-This is the final planned phase. It focuses on making the existing workflow easier to demonstrate rather than adding more infrastructure.
-
-### Final dashboard improvements
-- Students see their allocated project description, faculty supervisor and the names/roll numbers of their allocated teammates.
-- Faculty and admin dashboards show project descriptions, required skills, supervisor and remaining team capacity.
-- Faculty and admin can review submitted student preferences before allocation, including student name, roll number, department, project and rank.
-- Faculty and admin can inspect the allocation results table.
-- The existing admin-only allocation button remains restricted to admin users.
-
-### Final demonstration guide
-Follow [docs/phase-4-demo-guide.md](docs/phase-4-demo-guide.md) for setup, demo account details, a suggested two-project/two-student scenario, expected results and the final acceptance checklist.
-
-### Deliberately excluded
-A chat/discussion feature is not included. It is not required to demonstrate project allocation, and adding a messaging feature now would increase scope and testing effort without improving the core college demo.
-
-### Final acceptance checklist
-- [ ] Application starts and connects to PostgreSQL.
-- [ ] Student registration, login and logout work.
-- [ ] Faculty can add projects and view project details.
-- [ ] Students can save and reload ranked preferences.
-- [ ] Faculty can view submitted student preferences before allocation.
-- [ ] Admin can run allocation and inspect the results.
-- [ ] Each student sees their allocated project and team members.
-- [ ] No project exceeds its configured capacity.
-- [ ] The final demonstration can be completed using the guide.
-
-Phase 4 implementation is committed, but the complete end-to-end manual acceptance is intentionally left for the project team to perform.
+**Project:** Smart Project Allocation and Team Collaboration Platform  
+**Purpose:** College Java mini-project  
+**Primary goal:** Make project preference submission and capacity-aware team allocation clear, manageable and demonstrable.
